@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-#from connection import LastfmError, LastfmParamError, LastfmAuthenticationError
+from connection import LastfmApiConnection
+from connection import LastfmError, LastfmParamError, LastfmAuthenticationError
 from _basetype import AbstractType
 
 class User(AbstractType):
@@ -58,8 +59,8 @@ class User(AbstractType):
 
 
 class UserMethod(object):
-    def __init__(self, api):
-        self.api_obj = api
+    def __init__(self, conn):
+        self.conn = conn
     
     def getLovedTracks(self, user=None, limit=None, page=None):
         """
@@ -73,11 +74,11 @@ class UserMethod(object):
         @return: A list of L{Track} objects
         """
         if user is None:
-            if self.api_obj.username is None:
+            if self.conn.username is None:
                 raise LastfmError("Username not set")
-            user = self.api_obj.username
-        xml = self.api_obj._api_get_request(user=user, method="user.getLovedTracks")
-        return self.api_obj.create_objects(xml, Track)
+            user = self.conn.username
+        xml = self.conn._api_get_request(user=user, method="user.getLovedTracks")
+        return self.conn.create_objects(xml, Track)
     
     
     def getInfo(self, user=None):
@@ -88,9 +89,11 @@ class UserMethod(object):
         @raise LastfmError : if user name is not set. 
         @return: A L{User} object
         """
+        print LastfmApiConnection.URL
         if user is None:
-            if self.api_obj.username is None:
-                raise LastfmError("Username not set")
-            user = self.api_obj.username
-        xml = self.api_obj._api_get_request(user=user, method="user.getInfo")
-        return self.api_obj.create_objects(xml, User)  
+            if self.conn.username is None:
+                print 'not set'
+                #raise LastfmError("Username not set")
+            user = self.conn.username
+        xml = self.conn._api_get_request(user=user, method="user.getInfo")
+        return self.conn.create_objects(xml, User)  

@@ -1,5 +1,4 @@
-from connection import LastfmApiConnection
-from connection import LastfmError, LastfmParamError, LastfmAuthenticationError
+
 from _basetype import AbstractType
 
 class Album(AbstractType):
