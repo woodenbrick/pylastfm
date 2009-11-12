@@ -58,3 +58,21 @@ class Event(AbstractType):
         """Link to external band/event webpage"""
         self.tickets = []
         """A list of urls where tickets for this event can be purchased"""
+
+
+class EventMethod(object):
+    def __init__(self, conn):
+        self.conn = conn
+        
+    
+    def attend(self, event, status):
+        """
+        Mark a user as attendance status for an event
+        @param event: (Required) The numeric last.fm event id
+        @param status: (Required) The attendance status
+        (0=Attending, 1=Maybe attending, 2=Not attending)
+        @return: True if status was successfully changed
+        """
+        data = self._create_api_signature(event=event, status=status,
+                                          method="event.attend")
+        return self._api_post_request(data)
