@@ -78,11 +78,12 @@ class LastfmApi(object):
 
     def auth_getToken(self, open_browser=True):
         """
+        Downloads a token from last.fm. For desktop applications only.
         @param open_browser: True if you wish pylastfm to open the users browser
         to authenticate your application. This would normally be the desired
         behaviour. After the user has allowed your application call
         L{auth_getSession()}
-        @raise: LastfmAuthenticationError if the token couldnt be acquired
+        @raise LastfmAuthenticationError: if the token couldnt be acquired
         @return: A token which can be used to authenticate your session
         """
         if open_browser:
@@ -115,10 +116,10 @@ class LastfmApi(object):
         
         If you are creating a DESKTOP APPLICATION:
         ==========================================
-            First call get_desktop_permissions()  
+            First call L{auth_getToken()}  
         
         @param token: the token sent to your callback url (WEB APP) or 
-        from L{get_desktop_permissions()} (DESKTOP APP).
+        from L{auth_getToken()} (DESKTOP APP).
         @return: True if the session key was set, else False
         """    
         data = self._create_api_signature(method="auth.getSession",
@@ -211,7 +212,7 @@ class LastfmApi(object):
         """
         Creates an Object from an XML document
         @param doc: an XML document
-        @param _class: a class that subclasses L{basetype} eg. L{User}
+        @param _class: a class that subclasses L{AbstractType} eg. L{User}
         @return: A list or single instance of type _class
         """
         tree = ElementTree.parse(doc)
