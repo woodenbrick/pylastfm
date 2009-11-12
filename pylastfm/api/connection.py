@@ -2,17 +2,16 @@ import os
 import hashlib
 import webbrowser
 import re
-import xmlrpclib
 import urllib
 import urllib2
 import time
 from xml.etree import ElementTree
+
 from _basetype import AbstractType
 import user
-from track import Track
-from album import AlbumMethod
-from event import Event
-#from lastfmtypes.tag import Tag
+import album
+
+
 
 class LastfmError(Exception):
     """Base class for all Last.fm Errors"""
@@ -245,192 +244,6 @@ class LastfmApiConnection(object):
         if len(object_list) == 1:
             return object_list[0]
         return object_list
-    #XXX need to return None for a dud object
-    
-
-    
-    ##
-    #Wrappers for calling Lastfm.Api methods
-    ##
-    
-    #ALBUM
-    
-    def album_addTags(self, artist, album, tags):
-        """
-        Tag an album using a list of user supplied tags. Requires authentication.
-        @param artist: (Required) The artist name in question
-        @param album: (Required) The album name in question
-        @param tags: (Required) A list of user supplied tags to apply to this
-        album. Accepts a maximum of 10 tags.
-        """
-        if not isinstance(tags, list):
-            raise LastfmParamError("argument tags requires a list")
-            return False
-        if len(tags) > 10:
-            raise LastfmParamError("Maximum of 10 tags allowed")
-            return False
-        data = self._create_api_signature(artist=artist, album=album,
-                                          tags=tags, method="album.addTags")
-        return self._api_post_request(data)
-    
-    
-    def album_getInfo(self, artist=None, album=None, mbid=None, username=None,
-                      lang=None):
-        """
-        Get the metadata for an album on Last.fm using the album name or
-        a musicbrainz id. See playlist.fetch on how to get the album playlist.
-        Doesn't require authentication.
-        @param artist: (Optional) The artist name in question
-        @param album: (Optional) The album name in question
-        @param mbid: (Optional) The musicbrainz id for the album
-        @param username: (Optional) The username for the context of the request.
-        If supplied, the user's playcount for this album is included in the response.
-        @param lang: (Optional) The language to return the biography in,
-        expressed as an ISO 639 alpha-2 code.
-        @return An L{Album} object, or None
-        """
-        if album is None and mbid is None:
-            raise LastfmParamError("Requires an album name or musicbrainz id")
-            return False
-        xml = self._api_get_request(artist=artist, album=album, mbid=mbid,
-                                     username=username, lang=lang,
-                                     method="album.getInfo")
-        return LastfmApiConnection.create_objects(xml, "Album")
-    
-    
-    def album_getTags(self, artist, album):
-        """
-        Get the tags applied by users to an album on Last.fm.
-        @param artist: (Required) The artist name in question
-        @param album: (Required) The album name in question
-        @return a list of L{Tag} objects or None
-        """
-        xml = self._api_get_request(artist=artist, album=album,
-                                    method="album.getTags")
-        return LastfmApiConnection.create_objects(xml, Tag)
-        
-    
-    def album_removeTag(self, artist, album, tag):
-        """
-        Remove a user's tag from an album.
-        @param artist: (Required) The artist name in question
-        @param album: (Required) The album name in question
-        @param tag: (Required) A single user tag to remove from this album.
-        """
-        data = self._create_api_signature(artist=artist, album=album, tag=tag,
-                                      method="album.removeTag")
-        return self._api_post_request(data)
-        
-    def album_search(self, album, limit=30, page=1):
-        """
-         Search for an album by name. Returns album matches sorted by relevance.
-        @param album: (Required) The album name in question
-        @param limit: (Optional) Limit the number of albums returned at
-        one time. Default (maximum) is 30.
-        @param page: (Optional) Scan into the results by specifying a page
-        number. Defaults to first page.
-        @return a list of L{Album} objects or None
-        """
-        xml = self._api_get_request(album=album, limit=limit, page=page,
-                                    method="album.search")
-        return LastfmApiConnection.create_objects(xml, Album)
-        
-    
-    #ARTIST
-    def artist_addTags():
-        pass
-    
-    def artist_getEvents():
-        pass
-    
-    def artist_getImages():
-        pass
-    
-    def artist_getInfo():
-        pass
-    
-    def artist_getPastEvents():
-        pass
-    
-    def artist_getPodcast():
-        pass
-    
-    def artist_getShouts():
-        pass
-    
-    def artist_getSimilar():
-        pass
-    
-    def artist_getTags():
-        pass
-    
-    def artist_getTopAlbums():
-        pass
-    
-    def artist_getTopFans():
-        pass
-    
-    def artist_getTopTags():
-        pass
-    def artist_getTopTracks():
-        pass
-    def artist_removeTag():
-        pass
-    
-    def artist_search():
-        pass
-    
-    def artist_share():
-        pass
-    
-    def artist_shout():
-        pass
-
-    def user_getLovedTracks(self, user=None, limit=None, page=None):
-        """
-        Get the last 50 tracks loved by a user. Authentication not required.
-        @param user: (Optional) The user name to fetch the loved tracks for.
-        If left blank the username for this session will be used.
-        @param limit: (Optional) An integer used to limit the number of tracks
-        returned per page. The default is 50.
-        @param page: (Optional) The page number to fetch.
-        @raise LastfmError : if user name is not set
-        @return: A list of L{Track} objects
-        """
-        if user is None:
-            if self.username is None:
-                raise LastfmError("Username not set")
-            user = self.username
-        xml = self._api_get_request(user=user, method="user.getLovedTracks")
-        return LastfmApiConnection._create_objects(xml, Track)
-
-    
-    def users_getInfo(self, user=None):
-        """
-        Get information about a user. Authentication not required.
-        @param user: (Optional) The user name to fetch info for.
-        If left blank the username for this session will be used.
-        @raise LastfmError : if user name is not set. 
-        @return: A L{User} object
-        """
-        if user is None:
-            if self.username is None:
-                raise LastfmError("Username not set")
-            user = self.username
-        xml = self._api_get_request(user=user, method="user.getInfo")
-        return LastfmApiConnection.create_objects(xml, User)   
-
-    def event_attend(self, event, status):
-        """
-        Mark a user as attendance status for an event
-        @param event: (Required) The numeric last.fm event id
-        @param status: (Required) The attendance status
-        (0=Attending, 1=Maybe attending, 2=Not attending)
-        @return: True if status was successfully changed
-        """
-        data = self._create_api_signature(event=event, status=status,
-                                          method="event.attend")
-        return self._api_post_request(data)
 
 
 class Cache(object):
