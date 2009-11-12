@@ -29,7 +29,11 @@ class AbstractType(object):
 
 
     def _set_attribute(self, name, value):
-        """Sets this attribute to the correct type, if this class requires it"""
+        """
+        Sets this attribute to the correct type, if this class requires it
+        @param name: The name of the attribute eg. realname
+        @param value: The value of the attribute eg. Daniel Woodhouse
+        """
         if hasattr(self, name):
             if name in self.int_types:
                 value = int(value)

@@ -1,3 +1,4 @@
+import os
 import hashlib
 import webbrowser
 import re
@@ -26,21 +27,24 @@ class LastfmApi(object):
     AUTH_URL = "http://www.last.fm/api/auth"
     
     def __init__(self, api_key, secret, session_key=None,
-                 username=None, password=None):
+                 username=None, password=None, cache_dir=None, cache_expiry=20):
         """
         Creates a new LastfmApi object.
         @param api_key: The api key provided by last.fm for your application
         @param secret: The secret key provided by last.fm
         @param session_key: A session key created in a previous session, or None
         @param username: The name of the user you wish to create a session for, or None,
-        @param password: The users password, or None
+        @param password: The users password, in plain text/md5 hash or None
+        @param cache_dir: The directory to store cache files, or None
+        @param cache_expiry: The cache expiry time in minutes
         """
         self.api_key = api_key
         self.secret = secret
         self.session_key = session_key
-        self.username = username
-        self.password = password
-        
+        self.username = self.set_username(username)
+        self.password = self.set_password(password)
+        self.cache_dir = self.set_cache_dir(cache_dir)
+        self.cache_expiry = cache_expiry
 
 
     def set_api_key(self, api_key, secret):
@@ -62,7 +66,10 @@ class LastfmApi(object):
         """
         @param password: The users password in plain text OR an md5 hash
         """
-        if not re.findall(r"^([a-fA-F\d]{32})$", password):
+        if password is None:
+            self.password = None
+            return
+        if not re.match(r"^([a-fA-F\d]{32})$", password):
             self.password = hashlib.md5(password).hexdigest()
         else:
             self.password = password
@@ -74,7 +81,21 @@ class LastfmApi(object):
         for the current user
         """
         self.session_key = session_key
-        
+    
+    def set_cache_dir(self, cache_dir):
+        """
+        @param cache_dir: The path to store cached files
+        return: True if the cache dir was set
+        """
+        if cache_dir is None:
+            self._caching_enabled = False
+        elif os.path.isdir(cache_dir):
+            self.cache_dir = cache_dir
+            self._caching_enabled = True
+        else:
+            self._caching_enabled = False
+        return self._caching_enabled
+            
 
     def auth_getToken(self, open_browser=True):
         """
@@ -160,19 +181,28 @@ class LastfmApi(object):
     
 
 
-    def _api_get_request(self, **kwargs):
+    def _api_get_request(self, cache=False, **kwargs):
         """
         Makes a GET request to last.fm
+        @param cache: Set to True if you want the library to use a cached
+        version of the document.
         @param kwargs: Any GET data that should be sent with the request
         eg. limit=1, user='woodenbrick'
         """
         kwargs['api_key'] = self.api_key
-        encoded_data = urllib.urlencode(kwargs)
-        request = urllib2.Request(url=LastfmApi.URL + "?" + encoded_data)
-        urllib.urlretrieve(LastfmApi.URL + "?" + encoded_data, "tester")
-        f = open("tester", "r")
-        return f
-        return urllib2.urlopen(request)
+        encoded_url = LastfmApi.URL + "?" + urllib.urlencode(kwargs)
+        if not self._caching_enabled:
+            request = urllib2.Request(url=encoded_url)
+            return urllib2.urlopen(request)
+        else:
+            #check if we have a local copy that hasnt expired
+            stats = os.stat(self.cache_dir + kwargs['method'])
+            print stats
+            urllib.urlretrieve(LastfmApi.URL + "?" + encoded_data,
+                           self.cache_dir + kwargs['method'])
+            f = open(kwargs['method'], "r")
+            return f
+        
 
     def _api_post_request(self, **kwargs):
         """
@@ -208,9 +238,9 @@ class LastfmApi(object):
         
 
     @staticmethod
-    def _create_objects(doc, _class):
+    def create_objects(doc, _class):
         """
-        Creates an Object from an XML document
+        Creates an Object from an XML document.
         @param doc: an XML document
         @param _class: a class that subclasses L{AbstractType} eg. L{User}
         @return: A list or single instance of type _class
