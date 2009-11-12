@@ -5,12 +5,14 @@ import re
 import xmlrpclib
 import urllib
 import urllib2
+import time
 from xml.etree import ElementTree
-
+from lastfmtypes._basetype import AbstractType
 from lastfmtypes.user import User
 from lastfmtypes.track import Track
 from lastfmtypes.album import Album
 from lastfmtypes.event import Event
+from lastfmtypes.tag import Tag
 
 class LastfmError(Exception):
     """Base class for all Last.fm Errors"""
@@ -20,14 +22,16 @@ class LastfmAuthenticationError(Exception):
     """Errors caused by authentication problems"""
     pass
 
+class LastfmParamError(Exception):
+    """Errors caused by passing incorrect parameters or invalid data"""
+
 class LastfmApi(object):
     """The LastfmApi class is the main entry point into this library."""
-    RESPONSE_OK = "ok"
     URL = "http://ws.audioscrobbler.com/2.0/"
     AUTH_URL = "http://www.last.fm/api/auth"
     
     def __init__(self, api_key, secret, session_key=None,
-                 username=None, password=None, cache_dir=None, cache_expiry=20):
+                 username=None, password=None, cache_enabled=False, cache_expiry=20):
         """
         Creates a new LastfmApi object.
         @param api_key: The api key provided by last.fm for your application
@@ -35,7 +39,7 @@ class LastfmApi(object):
         @param session_key: A session key created in a previous session, or None
         @param username: The name of the user you wish to create a session for, or None,
         @param password: The users password, in plain text/md5 hash or None
-        @param cache_dir: The directory to store cache files, or None
+        @param cache_enabled: Whether objects will be cached for reuse
         @param cache_expiry: The cache expiry time in minutes
         """
         self.api_key = api_key
@@ -43,8 +47,7 @@ class LastfmApi(object):
         self.session_key = session_key
         self.username = self.set_username(username)
         self.password = self.set_password(password)
-        self.cache_dir = self.set_cache_dir(cache_dir)
-        self.cache_expiry = cache_expiry
+        Cache.set_cache(cache_enabled, cache_expiry)
 
 
     def set_api_key(self, api_key, secret):
@@ -81,21 +84,7 @@ class LastfmApi(object):
         for the current user
         """
         self.session_key = session_key
-    
-    def set_cache_dir(self, cache_dir):
-        """
-        @param cache_dir: The path to store cached files
-        return: True if the cache dir was set
-        """
-        if cache_dir is None:
-            self._caching_enabled = False
-        elif os.path.isdir(cache_dir):
-            self.cache_dir = cache_dir
-            self._caching_enabled = True
-        else:
-            self._caching_enabled = False
-        return self._caching_enabled
-            
+   
 
     def auth_getToken(self, open_browser=True):
         """
@@ -181,27 +170,23 @@ class LastfmApi(object):
     
 
 
-    def _api_get_request(self, cache=False, **kwargs):
+    def _api_get_request(self, **kwargs):
         """
         Makes a GET request to last.fm
-        @param cache: Set to True if you want the library to use a cached
-        version of the document.
         @param kwargs: Any GET data that should be sent with the request
         eg. limit=1, user='woodenbrick'
         """
         kwargs['api_key'] = self.api_key
+        #XXX kwargs with a value of None should not be encoded
         encoded_url = LastfmApi.URL + "?" + urllib.urlencode(kwargs)
-        if not self._caching_enabled:
-            request = urllib2.Request(url=encoded_url)
-            return urllib2.urlopen(request)
-        else:
-            #check if we have a local copy that hasnt expired
-            stats = os.stat(self.cache_dir + kwargs['method'])
-            print stats
-            urllib.urlretrieve(LastfmApi.URL + "?" + encoded_data,
-                           self.cache_dir + kwargs['method'])
-            f = open(kwargs['method'], "r")
-            return f
+        if Cache.ENABLED:
+            object = Cache.return_object(kwargs['api_sig'])
+            if object is not None:
+                return object
+        #download new data    
+        request = urllib2.Request(url=encoded_url)
+        return urllib2.urlopen(request)
+
         
 
     def _api_post_request(self, **kwargs):
@@ -243,8 +228,12 @@ class LastfmApi(object):
         Creates an Object from an XML document.
         @param doc: an XML document
         @param _class: a class that subclasses L{AbstractType} eg. L{User}
-        @return: A list or single instance of type _class
+        @return: A list or single instance of type _class or None if it couldnt
+        be built
         """
+        #sometimes we have a cached version, so we dont need to create objects
+        if isinstance(doc, list) or isinstance(doc, AbstractType):
+            return doc
         tree = ElementTree.parse(doc)
         iter = tree.getiterator(_class.ROOT_NODE)
         object_list = []
@@ -253,8 +242,146 @@ class LastfmApi(object):
         if len(object_list) == 1:
             return object_list[0]
         return object_list
+    #XXX need to return None for a dud object
     
 
+    
+    ##
+    #Wrappers for calling Lastfm.Api methods
+    ##
+    
+    #ALBUM
+    
+    def album_addTags(self, artist, album, tags):
+        """
+        Tag an album using a list of user supplied tags. Requires authentication.
+        @param artist: (Required) The artist name in question
+        @param album: (Required) The album name in question
+        @param tags: (Required) A list of user supplied tags to apply to this
+        album. Accepts a maximum of 10 tags.
+        """
+        if not isinstance(tags, list):
+            raise LastfmParamError("argument tags requires a list")
+            return False
+        if len(tags) > 10:
+            raise LastfmParamError("Maximum of 10 tags allowed")
+            return False
+        data = self._create_api_signature(artist=artist, album=album,
+                                          tags=tags, method="album.addTags")
+        return self._api_post_request(data)
+    
+    
+    def album_getInfo(self, artist=None, album=None, mbid=None, username=None,
+                      lang=None):
+        """
+        Get the metadata for an album on Last.fm using the album name or
+        a musicbrainz id. See playlist.fetch on how to get the album playlist.
+        Doesn't require authentication.
+        @param artist: (Optional) The artist name in question
+        @param album: (Optional) The album name in question
+        @param mbid: (Optional) The musicbrainz id for the album
+        @param username: (Optional) The username for the context of the request.
+        If supplied, the user's playcount for this album is included in the response.
+        @param lang: (Optional) The language to return the biography in,
+        expressed as an ISO 639 alpha-2 code.
+        @return An L{Album} object, or None
+        """
+        if album is None and mbid is None:
+            raise LastfmParamError("Requires an album name or musicbrainz id")
+            return False
+        xml = self._api_get_request(artist=artist, album=album, mbid=mbid,
+                                     username=username, lang=lang,
+                                     method="album.getInfo")
+        return LastfmApi.create_objects(xml, "Album")
+    
+    
+    def album_getTags(self, artist, album):
+        """
+        Get the tags applied by users to an album on Last.fm.
+        @param artist: (Required) The artist name in question
+        @param album: (Required) The album name in question
+        @return a list of L{Tag} objects or None
+        """
+        xml = self._api_get_request(artist=artist, album=album,
+                                    method="album.getTags")
+        return LastfmApi.create_objects(xml, Tag)
+        
+    
+    def album_removeTag(self, artist, album, tag):
+        """
+        Remove a user's tag from an album.
+        @param artist: (Required) The artist name in question
+        @param album: (Required) The album name in question
+        @param tag: (Required) A single user tag to remove from this album.
+        """
+        data = self._create_api_signature(artist=artist, album=album, tag=tag,
+                                      method="album.removeTag")
+        return self._api_post_request(data)
+        
+    def album_search(self, album, limit=30, page=1):
+        """
+         Search for an album by name. Returns album matches sorted by relevance.
+        @param album: (Required) The album name in question
+        @param limit: (Optional) Limit the number of albums returned at
+        one time. Default (maximum) is 30.
+        @param page: (Optional) Scan into the results by specifying a page
+        number. Defaults to first page.
+        @return a list of L{Album} objects or None
+        """
+        xml = self._api_get_request(album=album, limit=limit, page=page,
+                                    method="album.search")
+        return LastfmApi.create_objects(xml, Album)
+        
+    
+    #ARTIST
+    def artist_addTags():
+        pass
+    
+    def artist_getEvents():
+        pass
+    
+    def artist_getImages():
+        pass
+    
+    def artist_getInfo():
+        pass
+    
+    def artist_getPastEvents():
+        pass
+    
+    def artist_getPodcast():
+        pass
+    
+    def artist_getShouts():
+        pass
+    
+    def artist_getSimilar():
+        pass
+    
+    def artist_getTags():
+        pass
+    
+    def artist_getTopAlbums():
+        pass
+    
+    def artist_getTopFans():
+        pass
+    
+    def artist_getTopTags():
+        pass
+    def artist_getTopTracks():
+        pass
+    def artist_removeTag():
+        pass
+    
+    def artist_search():
+        pass
+    
+    def artist_share():
+        pass
+    
+    def artist_shout():
+        pass
 
     def user_getLovedTracks(self, user=None, limit=None, page=None):
         """
@@ -288,7 +415,7 @@ class LastfmApi(object):
                 raise LastfmError("Username not set")
             user = self.username
         xml = self._api_get_request(user=user, method="user.getInfo")
-        return self._create_objects(xml, User)   
+        return LastfmApi.create_objects(xml, User)   
 
     def event_attend(self, event, status):
         """
@@ -301,4 +428,29 @@ class LastfmApi(object):
         data = self._create_api_signature(event=event, status=status,
                                           method="event.attend")
         return self._api_post_request(data)
+
+
+class Cache(object):
+    CACHE_DICT = {}
+    EXPIRY = 20
+    ENABLED = False
+    
+    def __init__(self, sig, object):
+        Cache.CACHE_DICT['sig'] = object
+        self.cache_time = time.time()
+        
+    @staticmethod
+    def set_cache(enabled, expiry):
+        Cache.ENABLED = enabled
+        Cache.EXPIRY = expiry
+
+    @staticmethod
+    def return_object(signature):
+        try:
+            obj = Cache.CACHE_DICT['sig']
+            if obj.cache_time - time.time() < Cache.EXPIRY:
+                return Cache.CACHE_DICT['sig']
+            return None
+        except KeyError:
+            return None
         
