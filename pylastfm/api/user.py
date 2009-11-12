@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+#from connection import LastfmError, LastfmParamError, LastfmAuthenticationError
 from _basetype import AbstractType
 
 class User(AbstractType):
@@ -55,3 +55,42 @@ class User(AbstractType):
         """
         pass
     
+
+
+class UserMethod(object):
+    def __init__(self, api):
+        self.api_obj = api
+    
+    def getLovedTracks(self, user=None, limit=None, page=None):
+        """
+        Get the last 50 tracks loved by a user. Authentication not required.
+        @param user: (Optional) The user name to fetch the loved tracks for.
+        If left blank the username for this session will be used.
+        @param limit: (Optional) An integer used to limit the number of tracks
+        returned per page. The default is 50.
+        @param page: (Optional) The page number to fetch.
+        @raise LastfmError : if user name is not set
+        @return: A list of L{Track} objects
+        """
+        if user is None:
+            if self.api_obj.username is None:
+                raise LastfmError("Username not set")
+            user = self.api_obj.username
+        xml = self.api_obj._api_get_request(user=user, method="user.getLovedTracks")
+        return self.api_obj.create_objects(xml, Track)
+    
+    
+    def getInfo(self, user=None):
+        """
+        Get information about a user. Authentication not required.
+        @param user: (Optional) The user name to fetch info for.
+        If left blank the username for this session will be used.
+        @raise LastfmError : if user name is not set. 
+        @return: A L{User} object
+        """
+        if user is None:
+            if self.api_obj.username is None:
+                raise LastfmError("Username not set")
+            user = self.api_obj.username
+        xml = self.api_obj._api_get_request(user=user, method="user.getInfo")
+        return self.api_obj.create_objects(xml, User)  

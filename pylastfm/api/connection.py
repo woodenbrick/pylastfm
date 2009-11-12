@@ -7,12 +7,12 @@ import urllib
 import urllib2
 import time
 from xml.etree import ElementTree
-from lastfmtypes._basetype import AbstractType
-from lastfmtypes.user import User
-from lastfmtypes.track import Track
-from lastfmtypes.album import Album
-from lastfmtypes.event import Event
-from lastfmtypes.tag import Tag
+from _basetype import AbstractType
+import user
+from track import Track
+from album import AlbumMethod
+from event import Event
+#from lastfmtypes.tag import Tag
 
 class LastfmError(Exception):
     """Base class for all Last.fm Errors"""
@@ -25,15 +25,15 @@ class LastfmAuthenticationError(Exception):
 class LastfmParamError(Exception):
     """Errors caused by passing incorrect parameters or invalid data"""
 
-class LastfmApi(object):
-    """The LastfmApi class is the main entry point into this library."""
+class LastfmApiConnection(object):
+    """The LastfmApiConnection class is the main entry point into this library."""
     URL = "http://ws.audioscrobbler.com/2.0/"
     AUTH_URL = "http://www.last.fm/api/auth"
     
     def __init__(self, api_key, secret, session_key=None,
                  username=None, password=None, cache_enabled=False, cache_expiry=20):
         """
-        Creates a new LastfmApi object.
+        Creates a new LastfmApiConnection object.
         @param api_key: The api key provided by last.fm for your application
         @param secret: The secret key provided by last.fm
         @param session_key: A session key created in a previous session, or None
@@ -48,6 +48,8 @@ class LastfmApi(object):
         self.username = self.set_username(username)
         self.password = self.set_password(password)
         Cache.set_cache(cache_enabled, cache_expiry)
+        #self.album = AlbumMethod(self)
+        self.user = user.UserMethod(self)
 
 
     def set_api_key(self, api_key, secret):
@@ -97,7 +99,7 @@ class LastfmApi(object):
         @return: A token which can be used to authenticate your session
         """
         if open_browser:
-            webbrowser.open_new_tab(LastfmApi.AUTH_URL)
+            webbrowser.open_new_tab(LastfmApiConnection.AUTH_URL)
         data = self._create_api_signature(method="auth.getToken")
         xml = self._api_get_request(**data)
         tree = ElementTree.parse(xml)
@@ -178,14 +180,16 @@ class LastfmApi(object):
         """
         kwargs['api_key'] = self.api_key
         #XXX kwargs with a value of None should not be encoded
-        encoded_url = LastfmApi.URL + "?" + urllib.urlencode(kwargs)
+        encoded_url = LastfmApiConnection.URL + "?" + urllib.urlencode(kwargs)
         if Cache.ENABLED:
-            object = Cache.return_object(kwargs['api_sig'])
+            signature = self._create_api_signature(**kwargs)
+            object = Cache.return_object(signature)
             if object is not None:
                 return object
         #download new data    
         request = urllib2.Request(url=encoded_url)
-        return urllib2.urlopen(request)
+        response = urllib2.urlopen(request)
+        return response
 
         
 
@@ -222,8 +226,7 @@ class LastfmApi(object):
             return False
         
 
-    @staticmethod
-    def create_objects(doc, _class):
+    def create_objects(self, doc, _class):
         """
         Creates an Object from an XML document.
         @param doc: an XML document
@@ -292,7 +295,7 @@ class LastfmApi(object):
         xml = self._api_get_request(artist=artist, album=album, mbid=mbid,
                                      username=username, lang=lang,
                                      method="album.getInfo")
-        return LastfmApi.create_objects(xml, "Album")
+        return LastfmApiConnection.create_objects(xml, "Album")
     
     
     def album_getTags(self, artist, album):
@@ -304,7 +307,7 @@ class LastfmApi(object):
         """
         xml = self._api_get_request(artist=artist, album=album,
                                     method="album.getTags")
-        return LastfmApi.create_objects(xml, Tag)
+        return LastfmApiConnection.create_objects(xml, Tag)
         
     
     def album_removeTag(self, artist, album, tag):
@@ -330,7 +333,7 @@ class LastfmApi(object):
         """
         xml = self._api_get_request(album=album, limit=limit, page=page,
                                     method="album.search")
-        return LastfmApi.create_objects(xml, Album)
+        return LastfmApiConnection.create_objects(xml, Album)
         
     
     #ARTIST
@@ -399,7 +402,7 @@ class LastfmApi(object):
                 raise LastfmError("Username not set")
             user = self.username
         xml = self._api_get_request(user=user, method="user.getLovedTracks")
-        return LastfmApi._create_objects(xml, Track)
+        return LastfmApiConnection._create_objects(xml, Track)
 
     
     def users_getInfo(self, user=None):
@@ -415,7 +418,7 @@ class LastfmApi(object):
                 raise LastfmError("Username not set")
             user = self.username
         xml = self._api_get_request(user=user, method="user.getInfo")
-        return LastfmApi.create_objects(xml, User)   
+        return LastfmApiConnection.create_objects(xml, User)   
 
     def event_attend(self, event, status):
         """

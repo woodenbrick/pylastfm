@@ -4,9 +4,9 @@ import sys
 from xml.etree import ElementTree
 #append system path
 sys.path.insert(0, "../")
-from pylastfm import api
-from pylastfm.lastfmtypes.user import User
-f = open("data/api_keys", "r")
+from pylastfm.api.connection import LastfmApiConnection
+from pylastfm.api.user import User
+f = open("../api_keys", "r")
 api_key = f.readline().strip()
 secret = f.readline().strip()
 session_key = f.readline().strip()
@@ -34,7 +34,7 @@ class LastfmObjects(unittest.TestCase):
 
 class ApiTest(unittest.TestCase):
     def setUp(self):
-        self.api = api.LastfmApi(api_key, secret)
+        self.api = LastfmApiConnection(api_key, secret)
         self.api.set_session_key(session_key)
         self.api.set_username("woodenbrick")
         
