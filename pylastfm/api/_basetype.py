@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-
+from user import UserMethod
+from album import AlbumMethod
 from xml.etree import ElementTree as ET
 
 class AbstractType(object):
@@ -42,3 +43,10 @@ class AbstractType(object):
                 value = bool(value)           
             setattr(self, name, value)
     
+class MethodFactory(object):
+    def __init__(self, cls):
+        classes = {
+            "user" : UserMethod,
+            "album" : AlbumMethod
+        }
+        return classes['cls']()
