@@ -1,2 +1,3 @@
 pylastfm is a python library to make working with the Last.fm API easier. Italso includes a scrobbler class.
+Please note this is in a heavy state of development and wont currently work correctly as huge parts are missing
 
