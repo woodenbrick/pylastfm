@@ -8,8 +8,7 @@ import time
 from xml.etree import ElementTree
 
 from _basetype import AbstractType
-import user
-import album
+from _basetype import MethodFactory
 
 
 
@@ -48,7 +47,7 @@ class LastfmApiConnection(object):
         self.password = self.set_password(password)
         Cache.set_cache(cache_enabled, cache_expiry)
         #self.album = AlbumMethod(self)
-        self.user = user.UserMethod(self)
+        self.user = MethodFactory("user")
 
 
     def set_api_key(self, api_key, secret):
