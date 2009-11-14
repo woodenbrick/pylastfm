@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-from connection import LastfmApiConnection
-from connection import LastfmError, LastfmParamError, LastfmAuthenticationError
+from error import LastfmError, LastfmParamError, LastfmAuthenticationError
 from _basetype import AbstractType
 
 class User(AbstractType):
@@ -89,7 +88,6 @@ class UserMethod(object):
         @raise LastfmError : if user name is not set. 
         @return: A L{User} object
         """
-        print LastfmApiConnection.URL
         if user is None:
             if self.conn.username is None:
                 print 'not set'
