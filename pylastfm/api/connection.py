@@ -7,21 +7,6 @@ import urllib2
 import time
 from xml.etree import ElementTree
 
-from _basetype import AbstractType
-from _basetype import MethodFactory
-
-
-
-class LastfmError(Exception):
-    """Base class for all Last.fm Errors"""
-    pass
-
-class LastfmAuthenticationError(Exception):
-    """Errors caused by authentication problems"""
-    pass
-
-class LastfmParamError(Exception):
-    """Errors caused by passing incorrect parameters or invalid data"""
 
 class LastfmApiConnection(object):
     """The LastfmApiConnection class is the main entry point into this library."""
@@ -40,6 +25,8 @@ class LastfmApiConnection(object):
         @param cache_enabled: Whether objects will be cached for reuse
         @param cache_expiry: The cache expiry time in minutes
         """
+        from _basetype import AbstractType
+        from user import UserMethod
         self.api_key = api_key
         self.secret = secret
         self.session_key = session_key
@@ -47,7 +34,7 @@ class LastfmApiConnection(object):
         self.password = self.set_password(password)
         Cache.set_cache(cache_enabled, cache_expiry)
         #self.album = AlbumMethod(self)
-        self.user = MethodFactory("user")
+        self.user = UserMethod(self)
 
 
     def set_api_key(self, api_key, secret):
