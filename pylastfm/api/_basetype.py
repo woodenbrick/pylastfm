@@ -36,7 +36,9 @@ class AbstractType(object):
         """
         if hasattr(self, name):
             if name in self.int_types:
-                value = int(value)
+                try:
+                    value = int(value)
+                except: pass
             if name in self.bool_types:
                 value = False if value == "0" else True
                 value = bool(value)           
