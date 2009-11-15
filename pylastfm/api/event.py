@@ -73,6 +73,5 @@ class EventMethod(object):
         (0=Attending, 1=Maybe attending, 2=Not attending)
         @return: True if status was successfully changed
         """
-        data = self._create_api_signature(event=event, status=status,
+        return self.conn._api_post_request(event=event, status=status,
                                           method="event.attend")
-        return self._api_post_request(data)
