@@ -6,12 +6,13 @@ import urllib
 import urllib2
 import time
 from xml.etree import ElementTree
-
+from _basetype import AbstractType
+from error import LastfmAuthenticationError, LastfmError, LastfmParamError
 
 class LastfmApiConnection(object):
     """The LastfmApiConnection class is the main entry point into this library."""
     URL = "http://ws.audioscrobbler.com/2.0/"
-    AUTH_URL = "http://www.last.fm/api/auth"
+
     
     def __init__(self, api_key, secret, session_key=None,
                  username=None, password=None, cache_enabled=False, cache_expiry=20):
@@ -27,6 +28,9 @@ class LastfmApiConnection(object):
         """
         from _basetype import AbstractType
         from user import UserMethod
+        from auth import AuthMethod
+        from event import EventMethod
+        
         self.api_key = api_key
         self.secret = secret
         self.session_key = session_key
@@ -35,7 +39,8 @@ class LastfmApiConnection(object):
         Cache.set_cache(cache_enabled, cache_expiry)
         #self.album = AlbumMethod(self)
         self.user = UserMethod(self)
-
+        self.auth = AuthMethod(self)
+        self.event = EventMethod(self)
 
     def set_api_key(self, api_key, secret):
         """
@@ -91,10 +96,12 @@ class LastfmApiConnection(object):
         @return: A dictionary containing all parameters and a md5 signature hash
         """
         kwargs['api_key'] = self.api_key
+        kwargs["sk"] = self.session_key
         data = ""
         for method, value in sorted(kwargs.iteritems()):
             data += "%s%s" % (method, value)
         data += self.secret
+        print data
         kwargs['api_sig'] = hashlib.md5(data.encode('UTF-8')).hexdigest()
         return kwargs
     
@@ -116,7 +123,10 @@ class LastfmApiConnection(object):
                 return object
         #download new data    
         request = urllib2.Request(url=encoded_url)
-        response = urllib2.urlopen(request)
+        try:
+            response = urllib2.urlopen(request)
+        except urllib2.HTTPError, e:
+                response = e
         return response
 
         
@@ -132,11 +142,13 @@ class LastfmApiConnection(object):
         if self.session_key is None:
             raise LastfmAuthenticationError("This service requires authentication")
             return False
-        kwargs["sk"] = self.session_key
-        kwargs["api_key"] = self.api_key
+        kwargs["api_sig"] = self._create_api_signature(**kwargs)
         encoded_data = urllib.urlencode(kwargs)
-        request = urllib2.Request(url=self.url, data=encoded_data)
-        response = urllib2.urlopen(request)
+        request = urllib2.Request(url=LastfmApiConnection.URL, data=encoded_data)
+        try:
+            response = urllib2.urlopen(request)
+        except urllib2.HTTPError, e:
+            response = e
         tree = ElementTree.parse(response)
         return self._get_xml_response_code(tree)
     
@@ -147,10 +159,9 @@ class LastfmApiConnection(object):
         @return: True if response was 'ok'
         """
         if etree.getroot().attrib['status'] == "ok":
-            print etree.getroot().attrib['status']
             return True
         else:
-            raise LastfmError(etree.find("error").text)
+            raise LastfmAuthenticationError(etree.find("error").text)
             return False
         
 
