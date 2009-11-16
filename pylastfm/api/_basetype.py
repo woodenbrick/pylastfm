@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from xml.etree import ElementTree as ET
+from error import LastfmAuthenticationError, LastfmError, LastfmParamError
 
 class AbstractType(object):
     """Abstract class for all Last.fm API methods"""
@@ -44,14 +45,14 @@ class AbstractType(object):
                 value = bool(value)           
             setattr(self, name, value)
     
-class MethodFactory(object):
-    from user import UserMethod
-    from album import AlbumMethod    
-    classes = {
-            "user" : UserMethod,
-            "album" : AlbumMethod
-    }    
+
+class AbstractMethod(object):
     
-    def new_method(self, cls, conn):    
-        self.conn = conn
-        return classes[cls]()
+    def _getUsername(self, user):
+        if user is None:
+            if self.conn.username is None:
+                raise LastfmError("Username not set")
+            return self.conn.username
+        else:
+            if isinstance(user, AbstractMethod):
+                return user.name
