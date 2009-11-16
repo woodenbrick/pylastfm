@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+from _basetype import AbstractType
+
+class Artist(AbstractType):
+    pass
 
 class ArtistMethod(object):
     def __init__(self, conn):

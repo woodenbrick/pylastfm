@@ -15,7 +15,7 @@ class AuthMethod(object):
         @param open_browser: True if you wish pylastfm to open the users browser
         to authenticate your application. This would normally be the desired
         behaviour. After the user has allowed your application call
-        L{auth_getSession()}
+        L{getSession()}
         @raise LastfmAuthenticationError: if the token couldnt be acquired
         @return: The token which can be used to authenticate your session
         """
@@ -52,10 +52,10 @@ class AuthMethod(object):
         
         If you are creating a DESKTOP APPLICATION:
         ==========================================
-            First call L{auth_getToken()}  
+            First call L{getToken()}  
         
         @param token: the token sent to your callback url (WEB APP) or 
-        from L{auth_getToken()} (DESKTOP APP).
+        from L{getToken()} (DESKTOP APP).
         @return: True if the session key was set, else False
         """    
         data = self.conn._create_api_signature(method="auth.getSession",

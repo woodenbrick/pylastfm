@@ -133,7 +133,7 @@ class UserMethod(AbstractMethod):
         @param user: (Optional) A string of the user to fetch results for,
         a L{User} object or None for user of the current session
         @param page: (Optional) The page number to scan to.
-        @param: limit (Optional) The maximum number of events to return per page.
+        @param limit: (Optional) The maximum number of events to return per page.
         @return: A list of L{Event} objects
         """
         pass
@@ -214,7 +214,7 @@ class UserMethod(AbstractMethod):
         @param user: (Optional) A string of the user to fetch results for,
         a L{User} object or None for user of the current session
         @param period: (Optional) overall | 7day | 3month | 6month | 12month
-        - The time period over which to retrieve top albums for.
+        The time period over which to retrieve top albums for.
         @return: A list of L{Album} objects.
         """
         pass
@@ -227,7 +227,7 @@ class UserMethod(AbstractMethod):
         @param user: (Optional) A string of the user to fetch results for,
         a L{User} object or None for user of the current session.
         @param period: (Optional) overall | 7day | 3month | 6month | 12month
-        - The time period over which to retrieve top artists for.
+        The time period over which to retrieve top artists for.
         """
         pass
     
@@ -249,7 +249,7 @@ class UserMethod(AbstractMethod):
         require authentication.
         @param user: (Optional) A string of the user to fetch results for,
         a L{User} object or None for user of the current session.
-        period (Optional) : overall | 7day | 3month | 6month | 12month -
+        period (Optional) : overall | 7day | 3month | 6month | 12month
         The time period over which to retrieve top tracks for.
         @return: A list of L{Track} objects.
         """
@@ -260,12 +260,12 @@ class UserMethod(AbstractMethod):
         Get an album chart for a user profile, for a given date range.
         If no date range is supplied, it will return the most recent album
         chart for this user. This service does not require authentication.
-         @param user: (Optional) A string of the user to fetch results for,
+        @param user: (Optional) A string of the user to fetch results for,
         a L{User} object or None for user of the current session.
         @param _from: (Optional) The date at which the chart should start from.
-        See L{User.getChartsList()} for more.
+        See L{getWeeklyChartList()} for more.
         @param to: (Optional) : The date at which the chart should end on.
-        See L{User.getChartsList()} for more.
+        See L{getWeeklyChartList()} for more.
         @return: A list of L{Album} objects
         """
         pass
@@ -278,9 +278,9 @@ class UserMethod(AbstractMethod):
         @param user: (Optional) A string of the user to fetch results for,
         a L{User} object or None for user of the current session.
         @param _from: (Optional) The date at which the chart should start from.
-        See L{User.getWeeklyChartsList()} for more.
+        See L{getWeeklyChartList()} for more.
         @param to: (Optional) : The date at which the chart should end on.
-        See L{User.getWeeklyChartsList()} for more.
+        See L{getWeeklyChartList()} for more.
         @return: A list of L{Artist} objects
         """
         pass
@@ -304,9 +304,9 @@ class UserMethod(AbstractMethod):
         @param user: (Optional) A string of the user to fetch results for,
         a L{User} object or None for user of the current session.
         @param _from: (Optional) The date at which the chart should start from.
-        See L{User.getWeeklyChartsList()} for more.
+        See L{getWeeklyChartList()} for more.
         @param to: (Optional) : The date at which the chart should end on.
-        See L{User.getWeeklyChartsList()} for more.
+        See L{getWeeklyChartList()} for more.
         @return: A list of L{Track} objects
         """
         pass
