@@ -58,18 +58,42 @@
     <li> <strong class="uidlink">object</strong>:
       <em class="summary">The most base type</em>
     <ul>
-    <li> <strong class="uidlink"><a href="pylastfm.lastfmtypes._basetype.AbstractType-class.html">pylastfm.lastfmtypes._basetype.AbstractType</a></strong>:
-      <em class="summary">Abstract class for all Last.fm API methods</em>
+    <li> <strong class="uidlink"><a href="pylastfm.api._basetype.AbstractMethod-class.html">pylastfm.api._basetype.AbstractMethod</a></strong>
     <ul>
-    <li> <strong class="uidlink"><a href="pylastfm.lastfmtypes.event.Event-class.html">pylastfm.lastfmtypes.event.Event</a></strong>
-    </li>
-    <li> <strong class="uidlink"><a href="pylastfm.lastfmtypes.track.Track-class.html">pylastfm.lastfmtypes.track.Track</a></strong>
-    </li>
-    <li> <strong class="uidlink"><a href="pylastfm.lastfmtypes.user.User-class.html">pylastfm.lastfmtypes.user.User</a></strong>
+    <li> <strong class="uidlink"><a href="pylastfm.api.user.UserMethod-class.html">pylastfm.api.user.UserMethod</a></strong>
     </li>
     </ul>
     </li>
-    <li> <strong class="uidlink"><a href="pylastfm.lastfmtypes.album.Album-class.html">pylastfm.lastfmtypes.album.Album</a></strong>
+    <li> <strong class="uidlink"><a href="pylastfm.api._basetype.AbstractType-class.html">pylastfm.api._basetype.AbstractType</a></strong>:
+      <em class="summary">Abstract class for all Last.fm API methods</em>
+    <ul>
+    <li> <strong class="uidlink"><a href="pylastfm.api.album.Album-class.html">pylastfm.api.album.Album</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.artist.Artist-class.html">pylastfm.api.artist.Artist</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.chart.Chart-class.html">pylastfm.api.chart.Chart</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.event.Event-class.html">pylastfm.api.event.Event</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.playlist.Playlist-class.html">pylastfm.api.playlist.Playlist</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.shout.Shout-class.html">pylastfm.api.shout.Shout</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.station.Station-class.html">pylastfm.api.station.Station</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.tag.Tag-class.html">pylastfm.api.tag.Tag</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.track.Track-class.html">pylastfm.api.track.Track</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.user.User-class.html">pylastfm.api.user.User</a></strong>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.album.AlbumMethod-class.html">pylastfm.api.album.AlbumMethod</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.artist.ArtistMethod-class.html">pylastfm.api.artist.ArtistMethod</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.auth.AuthMethod-class.html">pylastfm.api.auth.AuthMethod</a></strong>
     </li>
     <li> <strong class="uidlink">exceptions.BaseException</strong>:
       <em class="summary">Common base class for all exceptions</em>
@@ -77,18 +101,30 @@
     <li> <strong class="uidlink">exceptions.Exception</strong>:
       <em class="summary">Common base class for all non-exit exceptions.</em>
     <ul>
-    <li> <strong class="uidlink"><a href="pylastfm.api.LastfmAuthenticationError-class.html">pylastfm.api.LastfmAuthenticationError</a></strong>:
+    <li> <strong class="uidlink"><a href="pylastfm.api.error.LastfmAuthenticationError-class.html">pylastfm.api.error.LastfmAuthenticationError</a></strong>:
       <em class="summary">Errors caused by authentication problems</em>
     </li>
-    <li> <strong class="uidlink"><a href="pylastfm.api.LastfmError-class.html">pylastfm.api.LastfmError</a></strong>:
+    <li> <strong class="uidlink"><a href="pylastfm.api.error.LastfmError-class.html">pylastfm.api.error.LastfmError</a></strong>:
       <em class="summary">Base class for all Last.fm Errors</em>
     </li>
-    </ul>
+    <li> <strong class="uidlink"><a href="pylastfm.api.error.LastfmParamError-class.html">pylastfm.api.error.LastfmParamError</a></strong>:
+      <em class="summary">Errors caused by passing incorrect parameters or invalid data</em>
     </li>
     </ul>
     </li>
-    <li> <strong class="uidlink"><a href="pylastfm.api.LastfmApi-class.html">pylastfm.api.LastfmApi</a></strong>:
-      <em class="summary">The LastfmApi class is the main entry point into this library.</em>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.connection.Cache-class.html">pylastfm.api.connection.Cache</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.event.EventMethod-class.html">pylastfm.api.event.EventMethod</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.api.connection.LastfmApiConnection-class.html">pylastfm.api.connection.LastfmApiConnection</a></strong>:
+      <em class="summary">The LastfmApiConnection class is the main entry point into this 
+        library.</em>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.scrobbler.ScrobbleTrack-class.html">pylastfm.scrobbler.ScrobbleTrack</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pylastfm.scrobbler.Scrobbler-class.html">pylastfm.scrobbler.Scrobbler</a></strong>
     </li>
     </ul>
     </li>
@@ -119,7 +155,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Nov 12 02:50:44 2009
+    Generated by Epydoc 3.0.1 on Mon Nov 16 00:59:20 2009
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"
