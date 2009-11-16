@@ -96,12 +96,12 @@ class LastfmApiConnection(object):
         @return: A dictionary containing all parameters and a md5 signature hash
         """
         kwargs['api_key'] = self.api_key
-        kwargs["sk"] = self.session_key
+        if self.session_key is not None:
+            kwargs["sk"] = self.session_key
         data = ""
         for method, value in sorted(kwargs.iteritems()):
             data += "%s%s" % (method, value)
         data += self.secret
-        print data
         kwargs['api_sig'] = hashlib.md5(data.encode('UTF-8')).hexdigest()
         return kwargs
     
@@ -142,7 +142,7 @@ class LastfmApiConnection(object):
         if self.session_key is None:
             raise LastfmAuthenticationError("This service requires authentication")
             return False
-        kwargs["api_sig"] = self._create_api_signature(**kwargs)
+        kwargs = self._create_api_signature(**kwargs)
         encoded_data = urllib.urlencode(kwargs)
         request = urllib2.Request(url=LastfmApiConnection.URL, data=encoded_data)
         try:
