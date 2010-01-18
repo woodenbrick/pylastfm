@@ -16,29 +16,20 @@ class User(AbstractType):
         self.id = None
         """Last.fm unique id"""
         self.name = None
-        """Last.fm username"""
         self.realname = None
-        """Users realname if known"""
         self.url = None
-        """Link to users last.fm page"""
         self.image = None
-        """Link to users image"""
         self.country = None
-        """Country the user is from"""
         self.age = None
-        """Age of user"""
         self.gender = None
         """one of 'M' or 'F'"""
         self.subscriber = None
-        """True if user is a subscriber"""
         self.playcount = None
         """How many tracks this user has scrobbled"""
         self.playlists = None
-        """How many playlists this user has"""
         self.bootstrap = None
-        """Not sure what this is but this it is supposed to be boolean"""
+        """Not sure what this is but this it is a boolean"""
         self.registered_unixtime = None
-        """A unix timestamp of the users registration"""
         self.registered = None
         """Date string in the form of 2002-11-20 11:50"""
         
