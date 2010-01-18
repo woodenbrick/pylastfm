@@ -63,10 +63,8 @@ class AlbumMethod(AbstractMethod):
         """
         if album is None and mbid is None:
             raise LastfmParamError("Requires an album name or musicbrainz id")
-        if isinstance(artist, Artist):
-            artist = artist.name
-        if isinstance(album, Album):
-            album = album.name
+        artist = self._get_attribute(artist)
+        album = self._get_attribute(album)
         xml = self.conn._api_get_request(artist=artist, album=album, mbid=mbid,
                                      username=username, lang=lang,
                                      method="album.getInfo")
@@ -80,10 +78,8 @@ class AlbumMethod(AbstractMethod):
         @param album: (Required) The album name or an L{Album} object
         @return a list of L{Tag} objects or None
         """
-        if isinstance(artist, Artist):
-            artist = artist.name
-        if isinstance(album, Album):
-            album = album.name
+        artist = self._get_attribute(artist)
+        album = self._get_attribute(album)
         xml = self.conn._api_get_request(artist=artist, album=album,
                                     method="album.getTags")
         return self.conn.create_objects(xml, Tag)
@@ -97,12 +93,9 @@ class AlbumMethod(AbstractMethod):
         @param tag: (Required) A single user tag to remove from this album. Can
         be a string or L{Tag} object
         """
-        if isinstance(artist, Artist):
-            artist = artist.name
-        if isinstance(album, Album):
-            album = album.name
-        if isinstance(tag, Tag):
-            tag = tag.name
+        artist = self._get_attribute(artist)
+        album = self._get_attribute(album)
+        tag = self._get_attribute(tag)
         data = self.conn._create_api_signature(artist=artist, album=album, tag=tag,
                                       method="album.removeTag")
         return self.conn._api_post_request(data)
@@ -117,8 +110,7 @@ class AlbumMethod(AbstractMethod):
         number. Defaults to first page.
         @return a list of L{Album} objects or None
         """
-        if isinstance(album, Album):
-            album = album.name
+        album = self._get_attribute(album)
         xml = self.conn._api_get_request(album=album, limit=limit, page=page,
                                     method="album.search")
         return self.conn.create_objects(xml, Album)
