@@ -7,26 +7,17 @@ class Album(AbstractType):
         self.album_rank = None
         """How this album ranks against others"""
         self.name = None
-        """The name of the album"""
         self.playcount = None
         """How many times tracks from this album have been played (this can
         refer to a single user or many)"""
         self.mbid = None
-        """Musicbrainz id"""
         self.url = None
-        """The last.fm url for this album"""
         self.artist = None
-        """The artist that created the album"""
         self.artist_url = None
-        """The last.fm url for this artist"""
         self.image_small = None
-        """A url for the album image"""
         self.image_medium = None
-        """A url for the album image"""
         self.image_large = None
-        """A url for the album image"""
         self.image_xlarge = None
-        """A url for the album image"""
         
         self._parse_etree(etree)
 
@@ -37,18 +28,17 @@ class AlbumMethod(object):
     
     def addTags(self, artist, album, tags):
         """
-        Tag an album using a list of user supplied tags. Requires authentication.
+        Tag an album using a list of user supplied tags. Requires authentication
         @param artist: (Required) The artist name in question
         @param album: (Required) The album name in question
         @param tags: (Required) A list of user supplied tags to apply to this
         album. Accepts a maximum of 10 tags.
-        """
+        @return: True if the tags were added successfully
+	"""
         if not isinstance(tags, list):
             raise LastfmParamError("argument tags requires a list")
-            return False
         if len(tags) > 10:
             raise LastfmParamError("Maximum of 10 tags allowed")
-            return False
         data = self.conn._create_api_signature(artist=artist, album=album,
                                           tags=tags, method="album.addTags")
         return self.conn._api_post_request(data)
@@ -71,7 +61,6 @@ class AlbumMethod(object):
         """
         if album is None and mbid is None:
             raise LastfmParamError("Requires an album name or musicbrainz id")
-            return False
         xml = self.conn._api_get_request(artist=artist, album=album, mbid=mbid,
                                      username=username, lang=lang,
                                      method="album.getInfo")
