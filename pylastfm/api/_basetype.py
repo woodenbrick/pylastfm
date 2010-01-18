@@ -56,3 +56,24 @@ class AbstractMethod(object):
         else:
             if isinstance(user, AbstractMethod):
                 return user.name
+    
+    def _create_comma_delimited_string(self, items, wanted_attrib="name"):
+        """Return a strings fromthat can be used as tags"""
+        # could be either : a string, a list of strings, a AbstractType object, a list
+        #of AbstractType objects
+        if not isinstance(items, list):
+            tags = [items]
+        #last.fm only allows 10 items per api call
+        if len(items) > 10:
+            raise LastfmParamError("Maximum of 10 items allowed")
+        if isinstance(tags[0], AbstractType):
+            items = [self._get_attribute(item, wanted_attrib) for item in items]
+        return ",".join(items)
+        
+    def _get_attribute(self, obj, attribute="name"):
+        """If this object is derived from AbstractType we will return the
+        required attribute, otherwise we return the object (a string)"""
+        if isinstance(obj, AbstractType):
+            return getattr(obj, attribute)
+        else:
+            return obj
