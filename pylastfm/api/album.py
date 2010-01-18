@@ -7,26 +7,17 @@ class Album(AbstractType):
         self.album_rank = None
         """How this album ranks against others"""
         self.name = None
-        """The name of the album"""
         self.playcount = None
         """How many times tracks from this album have been played (this can
         refer to a single user or many)"""
         self.mbid = None
-        """Musicbrainz id"""
         self.url = None
-        """The last.fm url for this album"""
         self.artist = None
-        """The artist that created the album"""
         self.artist_url = None
-        """The last.fm url for this artist"""
         self.image_small = None
-        """A url for the album image"""
         self.image_medium = None
-        """A url for the album image"""
         self.image_large = None
-        """A url for the album image"""
         self.image_xlarge = None
-        """A url for the album image"""
         
         self._parse_etree(etree)
 
@@ -37,23 +28,19 @@ class AlbumMethod(object):
     
     def addTags(self, artist, album, tags):
         """
+<<<<<<< HEAD:pylastfm/api/album.py
         Tag an album using a list of user supplied tags. Requires authentication.
         @param artist: A string of the artist's name or an L{Artist} object
         @param album: A string of the album's name or an L{Album} object
         @param tags: A list of user supplied tags to apply to this
         album. Accepts a maximum of 10 tags. These can be strings or L{Tag} objects
         """
-        if isinstance(artist, Artist):
-            artist = artist.name
-        if isinstance(album, Album):
-            album = album.name
         #tags could be either : a string, a list of strings, a Tag object, a list
         #of tag objects
         if not isinstance(tags, list):
             tags = [tags]
         if len(tags) > 10:
             raise LastfmParamError("Maximum of 10 tags allowed")
-            return False
         if isinstance(tags[0], Tag):
             for i, tag in enumerate(tags):
                 tags[i] = tag.name
@@ -80,7 +67,6 @@ class AlbumMethod(object):
         """
         if album is None and mbid is None:
             raise LastfmParamError("Requires an album name or musicbrainz id")
-            return False
         if isinstance(artist, Artist):
             artist = artist.name
         if isinstance(album, Album):
