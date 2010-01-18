@@ -1,5 +1,5 @@
 
-from _basetype import AbstractType
+from _basetype import AbstractType, AbstractMethod
 
 class Album(AbstractType):
     def __init__(self, etree):
@@ -27,7 +27,7 @@ class Album(AbstractType):
         
         self._parse_etree(etree)
 
-class AlbumMethod(object):
+class AlbumMethod(AbstractMethod):
     
     def __init__(self, conn):
         self.conn = conn
@@ -40,16 +40,7 @@ class AlbumMethod(object):
         @param tags: A list of user supplied tags to apply to this
         album. Accepts a maximum of 10 tags. These can be strings or L{Tag} objects
         """
-        #tags could be either : a string, a list of strings, a Tag object, a list
-        #of tag objects
-        if not isinstance(tags, list):
-            tags = [tags]
-        if len(tags) > 10:
-            raise LastfmParamError("Maximum of 10 tags allowed")
-        if isinstance(tags[0], Tag):
-            for i, tag in enumerate(tags):
-                tags[i] = tag.name
-        tags = ",".join(tags)
+        tags = self._create_tag_list(tags)
         data = self.conn._create_api_signature(artist=artist, album=album,
                                           tags=tags, method="album.addTags")
         return self.conn._api_post_request(data)
