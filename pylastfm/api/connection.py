@@ -46,8 +46,6 @@ class LastfmApiConnection(object):
         self.username = self.set_username(username)
         self.password = self.set_password(password)
         Cache.set_cache(cache_enabled, cache_expiry)
-        #self.album = AlbumMethod(self)
-        self.user = MethodFactory("user")
 
 
     def set_api_key(self, api_key, secret):
@@ -120,8 +118,7 @@ class LastfmApiConnection(object):
         eg. limit=1, user='woodenbrick'
         """
         kwargs['api_key'] = self.api_key
-        #XXX kwargs with a value of None should not be encoded
-        encoded_url = LastfmApiConnection.URL + "?" + urllib.urlencode(kwargs)
+        encoded_url = LastfmApiConnection.URL + "?" + _encode_url_params(kwargs)
         if Cache.ENABLED:
             signature = self._create_api_signature(**kwargs)
             object = Cache.return_object(signature)
@@ -144,15 +141,23 @@ class LastfmApiConnection(object):
         """
         if self.session_key is None:
             raise LastfmAuthenticationError("This service requires authentication")
-            return False
         kwargs["sk"] = self.session_key
         kwargs["api_key"] = self.api_key
-        encoded_data = urllib.urlencode(kwargs)
+        encoded_data = _encode_lastfm_params(kwargs)
         request = urllib2.Request(url=self.url, data=encoded_data)
         response = urllib2.urlopen(request)
         tree = ElementTree.parse(response)
         return self._get_xml_response_code(tree)
     
+
+    def _encode_lastfm_params(self, arg_dic):
+        """Remove unwanted parameters from argument list and encode"""
+        clean_dic = {}
+        for key, value in arg_dic.items():
+            if value is None:
+                clean_dic[key] = value
+        return urllib.urlencode(clean_dic)
+
     def _get_xml_response_code(self, etree):
         """
         Checks the status of a request
