@@ -40,7 +40,7 @@ class AlbumMethod(AbstractMethod):
         @param tags: A list of user supplied tags to apply to this
         album. Accepts a maximum of 10 tags. These can be strings or L{Tag} objects
         """
-        tags = self._create_tag_list(tags)
+        tags = self._create_comma_delimited_string(tags)
         data = self.conn._create_api_signature(artist=artist, album=album,
                                           tags=tags, method="album.addTags")
         return self.conn._api_post_request(data)
