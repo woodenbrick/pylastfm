@@ -3,14 +3,19 @@ from _basetype import AbstractType
 
 class Album(AbstractType):
     def __init__(self, etree):
-        AbstractType.__init__(self, int_types=[])
+        AbstractType.__init__(self, int_types=["listeners", "playcount"])
         self.album_rank = None
         """How this album ranks against others"""
+        self.id = None
         self.name = None
         self.playcount = None
         """How many times tracks from this album have been played (this can
         refer to a single user or many)"""
+        self.release_date = None
+        self.listeners = None
+        self.playcount = None
         self.mbid = None
+        self.top_tags = None
         self.url = None
         self.artist = None
         self.artist_url = None
@@ -18,6 +23,7 @@ class Album(AbstractType):
         self.image_medium = None
         self.image_large = None
         self.image_xlarge = None
+        self.wiki = None
         
         self._parse_etree(etree)
 
@@ -28,7 +34,6 @@ class AlbumMethod(object):
     
     def addTags(self, artist, album, tags):
         """
-<<<<<<< HEAD:pylastfm/api/album.py
         Tag an album using a list of user supplied tags. Requires authentication.
         @param artist: A string of the artist's name or an L{Artist} object
         @param album: A string of the album's name or an L{Album} object
